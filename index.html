@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Mapa de tráfico</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet" />
+<style>
+  body { margin: 0; padding: 0; }
+  #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+
+  /* Leyenda de simbología de tráfico */
+  .legend {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: white;
+    padding: 10px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    border-radius: 5px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+  .legend h4 {
+    margin: 0 0 5px;
+    font-size: 13px;
+    text-align: center;
+  }
+  .legend div {
+    display: flex;
+    align-items: center;
+    margin: 3px 0;
+  }
+  .legend span {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- Leyenda -->
+<div class="legend">
+  <h4>Tráfico</h4>
+  <div><span style="background:#33cc33"></span> Fluido</div>
+  <div><span style="background:#ffcc00"></span> Moderado</div>
+  <div><span style="background:#ff6600"></span> Denso</div>
+  <div><span style="background:#cc0000"></span> Congestionado</div>
+</div>
+
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiYXN0ZXJpYW43NSIsImEiOiJjamFscDJjeDEyeGd6MzNsZG8wY2p6czNvIn0.uF9zpBjemJXFbA_oQE8L8Q'; // reemplaza con tu token
+
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/satellite-streets-v12',
+  center: [-78.4678, -0.1807], // Quito
+  zoom: 12
+});
+
+map.on('load', () => {
+  // Fuente de tráfico de Mapbox
+  map.addSource('traffic', {
+    type: 'vector',
+    url: 'mapbox://mapbox.mapbox-traffic-v1'
+  });
+
+  // Capa de tráfico con simbología
+  map.addLayer({
+    id: 'traffic-layer',
+    type: 'line',
+    source: 'traffic',
+    'source-layer': 'traffic',
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round'
+    },
+    paint: {
+      'line-color': [
+        "match",
+        ["get", "congestion"],
+        "low", "#33cc33",
+        "moderate", "#ffcc00",
+        "heavy", "#ff6600",
+        "severe", "#cc0000",
+        "#999999"
+      ],
+      'line-width': [
+        "interpolate", ["linear"], ["zoom"],
+        10, 2,
+        14, 6,
+        18, 10
+      ]
+    }
+  });
+});
+</script>
+</body>
+</html>
